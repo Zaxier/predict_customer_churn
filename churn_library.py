@@ -1,8 +1,8 @@
 # library doc string
 
-
-# import libraries
-
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def import_data(pth):
     '''
@@ -13,7 +13,12 @@ def import_data(pth):
     output:
             df: pandas dataframe
     '''
-    pass
+    try:
+        data = pd.read_csv(pth)
+        data['Churn'] = data['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
+        return data
+    except:
+        pass
 
 
 def perform_eda(df):
@@ -25,13 +30,36 @@ def perform_eda(df):
     output:
             None
     '''
-    pass
 
+    # save churn distribution
+    plt.figure(figsize=(20, 10))
+    df['Churn'].hist()
+    plt.savefig('images/eda/churn_distribution.png')
+
+    # marital status
+    plt.figure(figsize=(20, 10))
+    df.Marital_Status.value_counts('normalize').plot(kind='bar')
+    plt.savefig('images/eda/marital_status_distribution.png')
+
+    # customer age
+    plt.figure(figsize=(20, 10))
+    df['Customer_Age'].hist()
+    plt.savefig('images/eda/customer_age_distribution.png')
+
+    # heatmap
+    plt.figure(figsize=(20, 10))
+    sns.heatmap(df.corr(), annot=False, cmap='Dark2_r', linewidths=2)
+    plt.savefig('images/eda/heatmap.png')
+
+    # total transaction distribution
+    plt.figure(figsize=(20, 10))
+    sns.distplot(df['Total_Trans_Ct'])
+    plt.savefig('images/eda/total_transaction_distribution.png')
 
 def encoder_helper(df, category_lst, response):
     '''
     helper function to turn each categorical column into a new column with
-    propotion of churn for each category - associated with cell 15 from the notebook
+    proportion of churn for each category - associated with cell 15 from the notebook
 
     input:
             df: pandas dataframe
@@ -39,9 +67,14 @@ def encoder_helper(df, category_lst, response):
             response: string of response name [optional argument that could be used for naming variables or index y column]
 
     output:
-            df: pandas dataframe with new columns for
+            df: pandas dataframe with new columns for category_lst
     '''
-    pass
+
+    for col in category_lst:
+        means = df.groupby(col)['Churn'].mean()
+        df[col+'_Churn'] = df[col].map(means)
+
+    return df
 
 
 def perform_feature_engineering(df, response):
@@ -107,3 +140,7 @@ def train_models(X_train, X_test, y_train, y_test):
               None
     '''
     pass
+
+if __name__ == "__main__":
+    df = import_data('./data/bank_data.csv')
+    perform_eda(df)
