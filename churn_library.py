@@ -1,7 +1,13 @@
 '''
 Docstring here
+
+# Todos
+ - Finish docstrings and check function descriptions
+ - Improve the error messages
+ - README file
 '''
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -15,7 +21,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 
-from sklearn.metrics import plot_roc_curve, classification_report
+from sklearn.metrics import plot_roc_curve, classification_report, RocCurveDisplay
+
+import constants
 
 def import_data(pth):
     '''
@@ -140,21 +148,41 @@ def classification_report_image(y_train,
     output:
              None
     '''
-    rf_test_classification_report = classification_report(y_test, y_test_preds_rf)
-    lr_test_classification_report = classification_report(y_test, y_test_preds_lr)
+    # rf_test_classification_report = classification_report(y_test, y_test_preds_rf)
+    # lr_test_classification_report = classification_report(y_test, y_test_preds_lr)
+    #
+    # report_lst = [rf_test_classification_report, lr_test_classification_report]
+    # name_lst = ['rf_results', 'logistic_results']
+    #
+    # # generate image of results for each model
+    # for report, name in zip(report_lst, name_lst):
+    #     img = Image.new('RGB', (400, 200), color='white')
+    #     draw = ImageDraw.Draw(img)
+    #     draw.text((10, 10), report, fill='black')
+    #     img.save(f'images/results/{name}.png')
 
-    report_lst = [rf_test_classification_report, lr_test_classification_report]
-    name_lst = ['rf_results', 'logistic_results']
+    plt.rc('figure', figsize=(5, 5))
+    plt.text(0.01, 1.25, str('Random Forest Train'), {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.05, str(classification_report(y_test, y_test_preds_rf)), {'fontsize': 10},
+             fontproperties='monospace')  # approach improved by OP -> monospace!
+    plt.text(0.01, 0.6, str('Random Forest Test'), {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.7, str(classification_report(y_train, y_train_preds_rf)), {'fontsize': 10},
+             fontproperties='monospace')  # approach improved by OP -> monospace!
+    plt.axis('off')
+    plt.savefig('images/results/rf_classification_report.png')
 
-    # generate image of results for each model
-    for report, name in zip(report_lst, name_lst):
-        img = Image.new('RGB', (400, 200), color='white')
-        draw = ImageDraw.Draw(img)
-        draw.text((10, 10), report, fill='black')
-        img.save(f'images/results/{name}.png')
+    plt.rc('figure', figsize=(5, 5))
+    plt.text(0.01, 1.25, str('Logistic Regression Train'), {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.05, str(classification_report(y_train, y_train_preds_lr)), {'fontsize': 10},
+             fontproperties='monospace')  # approach improved by OP -> monospace!
+    plt.text(0.01, 0.6, str('Logistic Regression Test'), {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.7, str(classification_report(y_test, y_test_preds_lr)), {'fontsize': 10},
+             fontproperties='monospace')  # approach improved by OP -> monospace!
+    plt.axis('off')
+    plt.savefig('images/results/lr_classification_report.png')
 
 
-def feature_importance_plot(model, X_data, output_pth):
+def feature_importance_plot(model, X, output_pth):
     '''
     creates and stores the feature importances in pth
     input:
@@ -165,7 +193,27 @@ def feature_importance_plot(model, X_data, output_pth):
     output:
              None
     '''
-    pass
+    importances = model.feature_importances_
+    # Sort feature importances in descending order
+    indices = np.argsort(importances)[::-1]
+    names = [X.columns[i] for i in indices]
+
+    plt.figure(figsize=(20, 10))
+    plt.title("Feature Importance")
+    plt.ylabel("Importance")
+
+    # Add bars
+    plt.bar(range(X.shape[1]), importances[indices])
+
+    # Add feature names as x-axis labels
+    plt.xticks(range(X.shape[1]), names, rotation=90)
+    plt.savefig(output_pth)
+
+
+def roc_curve_plot(model, X, y, output_pth):
+    plt.figure(figsize=(15,8))
+    RocCurveDisplay.from_estimator(model, X, y)
+    plt.savefig(output_pth)
 
 
 def train_models(X_train, X_test, y_train, y_test):
@@ -220,13 +268,21 @@ def train_models(X_train, X_test, y_train, y_test):
         X_test,
         'images/results/feature_importances.png')
 
+    roc_curve_plot(cv_rfc, X_test, y_test, 'images/results/rf_roc_curve.png')
+    roc_curve_plot(lrc, X_test, y_test, 'images/results/lr_roc_curve.png')
+
     # save best model
     joblib.dump(cv_rfc.best_estimator_, './models/rfc_model.pkl')
     joblib.dump(lrc, './models/logistic_model.pkl')
 
 
-
-
-if __name__ == "__main__":
+def main():
     df = import_data('./data/bank_data.csv')
     perform_eda(df)
+    encoded_df = encoder_helper(df, constants.cat_columns, '_Churn')
+    X_train, X_test, y_train, y_test = perform_feature_engineering(encoded_df)
+    train_models(X_train, X_test, y_train, y_test)
+
+if __name__ == "__main__":
+    main()
+
