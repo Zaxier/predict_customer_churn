@@ -14,19 +14,15 @@ This will create a new conda environment named `predict_churn`, unless you chang
 
 
 ### 2. Run churn_library.py
-To process data, conduct eda, train models, and export model results run
+To preprocess the raw data, conduct eda on that data, train the models, and export model results run the following from the command line:
 ```bash
 python churn_library.py
 ```
 
-### Testing
-With pytest installed you can simply run 
-```bash
-pytest
-```
-in the project directory to run the tests defined in `test_churn_script_logging_and_tests.py`.
+### Testing - OPTIONAL
+With pytest installed you can simply run `pytest` from the shell from within the project directory to run the tests defined in `test_churn_script_logging_and_tests.py`.
 
-Or you can run the test file directly, i.e.
+Alternatively you can run the test file directly, i.e.
 ```bash
 python test_churn_script_logging_and_tests.py
 ```
