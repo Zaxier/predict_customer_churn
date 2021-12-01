@@ -5,7 +5,7 @@ Churn prediction model for bank data. Focus of the project is to develop fully t
 
 ## Running Files
 
-#### 1. Set up Python environment
+### 1. Set up Python environment
 Install dependencies in the `environment.yml` file, ideally in a new conda environment by running 
 ```bash
 conda env create -f environment.yml
@@ -13,13 +13,13 @@ conda env create -f environment.yml
 This will create a new conda environment named `predict_churn`, unless you change the name of the environment by adjusting the first line of `environment.yml`
 
 
-#### 2. Run churn_library.py
+### 2. Run churn_library.py
 To process data, conduct eda, train models, and export model results run
 ```bash
 python churn_library.py
 ```
 
-#### Testing
+### Testing
 With pytest installed you can simply run 
 ```bash
 pytest
