@@ -3,10 +3,6 @@ Churn Prediction Module
 
 Author: Xavier A
 Date: Nov 2021
-
-# Todos
- - TODO: Improve the error messages
- - README file
 '''
 
 import numpy as np
