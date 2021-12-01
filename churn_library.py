@@ -1,9 +1,11 @@
 '''
-Docstring here
+Churn Prediction Module
+
+Author: Xavier A
+Date: Nov 2021
 
 # Todos
- - Finish docstrings and check function descriptions
- - Improve the error messages
+ - TODO: Improve the error messages
  - README file
 '''
 
@@ -13,7 +15,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
 import shap
-from PIL import Image, ImageDraw
 
 from sklearn.model_selection import train_test_split
 
@@ -24,6 +25,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import plot_roc_curve, classification_report, RocCurveDisplay
 
 import constants
+
 
 def import_data(pth):
     '''
@@ -36,9 +38,10 @@ def import_data(pth):
     '''
     try:
         data = pd.read_csv(pth)
-        data['Churn'] = data['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
+        data['Churn'] = data['Attrition_Flag'].apply(
+            lambda val: 0 if val == "Existing Customer" else 1)
         return data
-    except:
+    except BaseException:
         pass
 
 
@@ -94,7 +97,7 @@ def encoder_helper(df, category_lst, response):
 
     for col in category_lst:
         means = df.groupby(col)['Churn'].mean()
-        df[col+'_Churn'] = df[col].map(means)
+        df[col + '_Churn'] = df[col].map(means)
 
     return df
 
@@ -113,17 +116,31 @@ def perform_feature_engineering(df, response=None):
     '''
     y = df.Churn
     X = pd.DataFrame()
-    keep_cols = ['Customer_Age', 'Dependent_count', 'Months_on_book',
-                 'Total_Relationship_Count', 'Months_Inactive_12_mon',
-                 'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
-                 'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
-                 'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio',
-                 'Gender_Churn', 'Education_Level_Churn', 'Marital_Status_Churn',
-                 'Income_Category_Churn', 'Card_Category_Churn']
+    keep_cols = [
+        'Customer_Age',
+        'Dependent_count',
+        'Months_on_book',
+        'Total_Relationship_Count',
+        'Months_Inactive_12_mon',
+        'Contacts_Count_12_mon',
+        'Credit_Limit',
+        'Total_Revolving_Bal',
+        'Avg_Open_To_Buy',
+        'Total_Amt_Chng_Q4_Q1',
+        'Total_Trans_Amt',
+        'Total_Trans_Ct',
+        'Total_Ct_Chng_Q4_Q1',
+        'Avg_Utilization_Ratio',
+        'Gender_Churn',
+        'Education_Level_Churn',
+        'Marital_Status_Churn',
+        'Income_Category_Churn',
+        'Card_Category_Churn']
 
     X[keep_cols] = df[keep_cols]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.3, random_state=42)
 
     return X_train, X_test, y_train, y_test
 
@@ -148,34 +165,26 @@ def classification_report_image(y_train,
     output:
              None
     '''
-    # rf_test_classification_report = classification_report(y_test, y_test_preds_rf)
-    # lr_test_classification_report = classification_report(y_test, y_test_preds_lr)
-    #
-    # report_lst = [rf_test_classification_report, lr_test_classification_report]
-    # name_lst = ['rf_results', 'logistic_results']
-    #
-    # # generate image of results for each model
-    # for report, name in zip(report_lst, name_lst):
-    #     img = Image.new('RGB', (400, 200), color='white')
-    #     draw = ImageDraw.Draw(img)
-    #     draw.text((10, 10), report, fill='black')
-    #     img.save(f'images/results/{name}.png')
 
     plt.rc('figure', figsize=(5, 5))
-    plt.text(0.01, 1.25, str('Random Forest Train'), {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 1.25, str('Random Forest Train'), {
+             'fontsize': 10}, fontproperties='monospace')
     plt.text(0.01, 0.05, str(classification_report(y_test, y_test_preds_rf)), {'fontsize': 10},
              fontproperties='monospace')  # approach improved by OP -> monospace!
-    plt.text(0.01, 0.6, str('Random Forest Test'), {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.6, str('Random Forest Test'), {
+             'fontsize': 10}, fontproperties='monospace')
     plt.text(0.01, 0.7, str(classification_report(y_train, y_train_preds_rf)), {'fontsize': 10},
              fontproperties='monospace')  # approach improved by OP -> monospace!
     plt.axis('off')
     plt.savefig('images/results/rf_classification_report.png')
 
     plt.rc('figure', figsize=(5, 5))
-    plt.text(0.01, 1.25, str('Logistic Regression Train'), {'fontsize': 10}, fontproperties='monospace')
-    plt.text(0.01, 0.05, str(classification_report(y_train, y_train_preds_lr)), {'fontsize': 10},
-             fontproperties='monospace')  # approach improved by OP -> monospace!
-    plt.text(0.01, 0.6, str('Logistic Regression Test'), {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 1.25, str('Logistic Regression Train'),
+             {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.05, str(classification_report(y_train, y_train_preds_lr)), {
+             'fontsize': 10}, fontproperties='monospace')  # approach improved by OP -> monospace!
+    plt.text(0.01, 0.6, str('Logistic Regression Test'), {
+             'fontsize': 10}, fontproperties='monospace')
     plt.text(0.01, 0.7, str(classification_report(y_test, y_test_preds_lr)), {'fontsize': 10},
              fontproperties='monospace')  # approach improved by OP -> monospace!
     plt.axis('off')
@@ -211,8 +220,15 @@ def feature_importance_plot(model, X, output_pth):
 
 
 def roc_curve_plot(model, X, y, output_pth):
-    plt.figure(figsize=(15,8))
+    plt.figure(figsize=(15, 8))
     RocCurveDisplay.from_estimator(model, X, y)
+    plt.savefig(output_pth)
+
+
+def shap_explainer_plot(model, X, output_pth):
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X)
+    shap.summary_plot(shap_values, X, plot_type="bar")
     plt.savefig(output_pth)
 
 
@@ -228,10 +244,10 @@ def train_models(X_train, X_test, y_train, y_test):
               None
     '''
 
-    # grid search
     rfc = RandomForestClassifier(random_state=42)
     lrc = LogisticRegression()
 
+    # Deep grid search
     # param_grid = {
     #     'n_estimators': [200, 500],
     #     'max_features': ['auto', 'sqrt'],
@@ -239,6 +255,7 @@ def train_models(X_train, X_test, y_train, y_test):
     #     'criterion': ['gini', 'entropy']
     # }
 
+    # Shallow grid search
     param_grid = {
         'n_estimators': [20, 50],
         'max_features': ['auto', 'sqrt'],
@@ -257,6 +274,7 @@ def train_models(X_train, X_test, y_train, y_test):
     y_train_preds_lr = lrc.predict(X_train)
     y_test_preds_lr = lrc.predict(X_test)
 
+    # Save results to images/
     classification_report_image(
         y_train, y_test,
         y_train_preds_lr, y_train_preds_rf,
@@ -271,7 +289,9 @@ def train_models(X_train, X_test, y_train, y_test):
     roc_curve_plot(cv_rfc, X_test, y_test, 'images/results/rf_roc_curve.png')
     roc_curve_plot(lrc, X_test, y_test, 'images/results/lr_roc_curve.png')
 
-    # save best model
+    shap_explainer_plot(cv_rfc.best_estimator_, X_test, 'images/results/rf_shap_values_summary.png')
+
+    # Save best model to models/
     joblib.dump(cv_rfc.best_estimator_, './models/rfc_model.pkl')
     joblib.dump(lrc, './models/logistic_model.pkl')
 
@@ -279,10 +299,10 @@ def train_models(X_train, X_test, y_train, y_test):
 def main():
     df = import_data('./data/bank_data.csv')
     perform_eda(df)
-    encoded_df = encoder_helper(df, constants.cat_columns, '_Churn')
+    encoded_df = encoder_helper(df, constants.CAT_COLUMNS, '_Churn')
     X_train, X_test, y_train, y_test = perform_feature_engineering(encoded_df)
     train_models(X_train, X_test, y_train, y_test)
 
+
 if __name__ == "__main__":
     main()
-
